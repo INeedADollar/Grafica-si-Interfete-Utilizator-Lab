@@ -1,0 +1,24 @@
+plugins {
+    id 'java'
+}
+
+group 'org.gui'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation files("./lib/gluegen-rt.jar")
+    implementation files("./lib/gluegen-rt-natives-windows-amd64.jar")
+    implementation files("./lib/jogl-all.jar")
+    implementation files("./lib/jogl-all-natives-windows-amd64.jar")
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
+}
