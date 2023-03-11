@@ -20,7 +20,7 @@ public class MainFrame extends JFrame implements GLEventListener
         this.setSize(800, 600);
 
         // This method will be explained later
-        // this.initializeJogl();
+        this.initializeJogl();
 
         this.setVisible(true);
     }
@@ -57,15 +57,6 @@ public class MainFrame extends JFrame implements GLEventListener
         // Obtain the GL instance associated with the canvas.
         GL2 gl = canvas.getGL().getGL2();
 
-        // Each time the scene is redrawn we clear the color buffers which is perceived by the user as clearing the scene.
-
-        // Set the color buffer to be filled with the color black when cleared.
-        // It can be defined in the init function (method) also.
-        gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-        // Clear the color buffer.
-        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
-
         // Set the clear color -- the color which will be used to reset the color buffer.
         gl.glClearColor(0, 0, 0, 0);
 
@@ -78,12 +69,33 @@ public class MainFrame extends JFrame implements GLEventListener
         // Set the projection to be orthographic.
         // It could have been as well chosen to be perspective.
         // Select the view volume to be x in the range of 0 to 1, y from 0 to 1 and z from -1 to 1.
-        gl.glOrtho(0, this.getBounds().width, 0, this.getBounds().height, -1, 1);
+        gl.glOrtho(0, getBounds().width, 0, getBounds().height, -1, 1);
+    }
+
+    @Override
+    public void dispose(GLAutoDrawable glAutoDrawable) {
+
+    }
+
+    public void display(GLAutoDrawable canvas)
+    {
+        GL2 gl = canvas.getGL().getGL2();
+
+        // Each time the scene is redrawn we clear the color buffers which is perceived by the user as clearing the scene.
+
+        // Set the color buffer to be filled with the color black when cleared.
+        // It can be defined in the init function (method) also.
+        gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+        // Clear the color buffer.
+        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
 
         // Set the size of the point
         gl.glPointSize(0.5f);
+
         // Set the width of the lines
         gl.glLineWidth(0.5f);
+
         gl.glLineStipple(1, (short) 0x3F07);
         gl.glEnable(GL2.GL_LINE_STIPPLE);
 
@@ -101,25 +113,8 @@ public class MainFrame extends JFrame implements GLEventListener
             gl.glColor3f(1.0f, 1.0f, 1.0f);
             gl.glVertex2f(0.4f, 0.4f);
         gl.glEnd();
-    }
 
-    @Override
-    public void dispose(GLAutoDrawable glAutoDrawable) {
-
-    }
-
-    public void display(GLAutoDrawable canvas)
-    {
-        // Retrieve a reference to a GL object. We need it because it contains all the useful OGL methods.
-        GL2 gl = canvas.getGL().getGL2();
-
-        // Each time the scene is redrawn we clear the color buffers which is perceived by the user as clearing the scene.
-        // Clear the color buffer
-        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
-
-        // Forcing the scene to be rendered.
         gl.glFlush();
-
     }
 
     public void reshape(GLAutoDrawable canvas, int left, int top, int width, int height)
@@ -148,12 +143,6 @@ public class MainFrame extends JFrame implements GLEventListener
         gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
     }
 
-    public void displayChanged(GLAutoDrawable canvas, boolean modeChanged, boolean deviceChanged) {
-        return;
-    }
-
     private GLCanvas canvas;
     private Animator animator;
-    double equation[] = { 1f, 1f, 1f, 1f};
-
 }
