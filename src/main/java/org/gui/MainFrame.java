@@ -70,6 +70,24 @@ public class MainFrame extends JFrame implements GLEventListener
         // It could have been as well chosen to be perspective.
         // Select the view volume to be x in the range of 0 to 1, y from 0 to 1 and z from -1 to 1.
         gl.glOrtho(0, getBounds().width, 0, getBounds().height, -1, 1);
+
+        // Activate the GL_LINE_SMOOTH state variable. Other options include
+        // GL_POINT_SMOOTH and GL_POLYGON_SMOOTH.
+        gl.glEnable(GL.GL_LINE_SMOOTH);
+
+        // Activate the GL_BLEND state variable. Means activating blending.
+        gl.glEnable(GL.GL_BLEND);
+
+        // Set the blend function. For antialiasing it is set to GL_SRC_ALPHA for the source
+        // and GL_ONE_MINUS_SRC_ALPHA for the destination pixel.
+        gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+
+        // Control GL_LINE_SMOOTH_HINT by applying the GL_DONT_CARE behavior.
+        // Other behaviours include GL_FASTEST or GL_NICEST.
+        gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_DONT_CARE);
+        // Uncomment the following two lines in case of polygon antialiasing
+        //gl.glEnable(GL.GL_POLYGON_SMOOTH);
+        //glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
     }
 
     @Override
@@ -96,13 +114,62 @@ public class MainFrame extends JFrame implements GLEventListener
         // Set the width of the lines
         //gl.glLineWidth(0.5f);
 
-        //gl.glLineStipple(1, (short) 0x3F07);
-        //gl.glEnable(GL2.GL_LINE_STIPPLE);
+        gl.glLineWidth(1.5f);
 
-        //drawSquareWithGL_LINES(gl);
-        //drawSquareWithGL_LINE_STRIP(gl);
-        //drawSquareWithGL_LINE_LOOP(gl);
-        drawCircle(gl);
+        gl.glColor3f(1.f, 0.f, 0.f);
+        gl.glBegin(GL2.GL_LINES);
+            gl.glVertex2f(0.2f, 0.2f);
+            gl.glVertex2f(0.9f, 0.9f);
+        gl.glEnd();
+
+        gl.glColor3f(0.f, 1.f, 0.f);
+        gl.glBegin(GL2.GL_LINES);
+            gl.glVertex2f(0.9f, 0.2f);
+            gl.glVertex2f(0.2f, 0.9f);
+        gl.glEnd();
+
+        gl.glBegin(GL2.GL_POLYGON);
+            gl.glColor3f(1.f, 0.f, 0.f);
+            gl.glVertex2f(0.2f, 0.2f);
+            gl.glColor3f(0.f, 1.f, 0.f);
+            gl.glVertex2f(0.2f, 0.4f);
+            gl.glColor3f(0.f, 0.f, 1.f);
+            gl.glVertex2f(0.4f, 0.4f);
+            gl.glColor3f(1.f, 1.f, 1.f);
+            gl.glVertex2f(0.4f, 0.2f);
+        gl.glEnd();
+
+        // Do not render front-faced polygons.
+        gl.glCullFace(GL.GL_FRONT);
+        // Culling must be enabled in order to work.
+        gl.glEnable(GL.GL_CULL_FACE);
+
+        gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2.GL_FILL);
+
+        // Define vertices in clockwise order (back-faced)
+        gl.glBegin(GL2.GL_POLYGON);
+            gl.glColor3f(1.f, 0.f, 0.f);
+            gl.glVertex2f(0.2f, 0.2f);
+            gl.glColor3f(0.f, 1.f, 0.f);
+            gl.glVertex2f(0.2f, 0.4f);
+            gl.glColor3f(0.f, 0.f, 1.f);
+            gl.glVertex2f(0.4f, 0.4f);
+            gl.glColor3f(1.f, 1.f, 1.f);
+            gl.glVertex2f(0.4f, 0.2f);
+        gl.glEnd();
+
+        // Generate a unique ID for our list.
+        aCircle = gl.glGenLists(1);
+
+        // Generate the Display List
+        gl.glNewList(aCircle, GL2.GL_COMPILE);
+            drawCircle(gl, 0.5f, 0.5f, 0.4f);
+        gl.glEndList();
+
+        gl.glColor3f(1.0f, 1.0f, 1.0f);
+        // Call the Display List i.e. call the commands stored in it.
+        gl.glCallList(aCircle);
+
         gl.glFlush();
     }
 
@@ -132,67 +199,23 @@ public class MainFrame extends JFrame implements GLEventListener
         gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
     }
 
-    private void drawSquareWithGL_LINES(GL2 gl) {
-        gl.glBegin(GL.GL_LINES);
-            gl.glColor3f(.0f, .23f, .23f);
-            gl.glVertex2f(.1f, .4f);
-            gl.glVertex2f(.4f, .4f);
+    // Here we define the function for building a circle from line segments.
+    private void drawCircle(GL2 gl, float xCenter, float yCenter, float radius) {
 
-            gl.glColor3f(.23f, .23f, .0f);
-            gl.glVertex2f(.4f, .4f);
-            gl.glVertex2f(.4f, .1f);
+        double x,y, angle;
 
-            gl.glColor3f(.0f, .67f, .67f);
-            gl.glVertex2f(.4f, .1f);
-            gl.glVertex2f(.1f, .1f);
-
-            gl.glColor3f(.5f, .0f, .5f);
-            gl.glVertex2f(.1f, .1f);
-            gl.glVertex2f(.1f, .4f);
+        gl.glBegin(GL2.GL_LINE_LOOP);
+        for (int i=0; i<360; i++) {
+            angle = Math.toRadians(i);
+            x = radius * Math.cos(angle);
+            y = radius * Math.sin(angle);
+            gl.glVertex2d(xCenter + x, yCenter + y);
+        }
         gl.glEnd();
-    }
 
-    private void drawSquareWithGL_LINE_STRIP(GL2 gl) {
-        gl.glBegin(GL.GL_LINE_STRIP);
-        gl.glColor3f(.0f, .23f, .23f);
-        gl.glVertex2f(.1f, .4f);
-        gl.glVertex2f(.4f, .4f);
-
-        gl.glVertex2f(.4f, .1f);
-
-        gl.glColor3f(.0f, .67f, .67f);
-        gl.glVertex2f(.1f, .1f);
-
-        gl.glColor3f(.5f, .0f, .5f);
-        gl.glVertex2f(.1f, .4f);
-        gl.glEnd();
-    }
-
-    private void drawSquareWithGL_LINE_LOOP(GL2 gl) {
-        gl.glBegin(GL.GL_LINE_LOOP);
-            gl.glColor3f(.0f, .23f, .23f);
-            gl.glVertex2f(.1f, .4f);
-            gl.glVertex2f(.4f, .4f);
-
-            gl.glVertex2f(.4f, .1f);
-            gl.glColor3f(.23f, .23f, .0f);
-
-            gl.glColor3f(.5f, .0f, .5f);
-            gl.glVertex2f(.1f, .1f);
-        gl.glEnd();
-    }
-
-    private void drawCircle(GL2 gl) {
-        gl.glEnable(GL.GL_LINE_LOOP);
-            for(int i = 0; i  < 360; i++) {
-                double angle = Math.toRadians(1);
-                double x = 0.7 * Math.cos(angle);
-                double y = 0.7 * Math.sin(angle);
-                gl.glVertex2f((float) ((float)x + .5), (float) ((float)y + .5));
-            }
-        gl.glEnd();
     }
 
     private GLCanvas canvas;
     private Animator animator;
+    int aCircle;
 }
