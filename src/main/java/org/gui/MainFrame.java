@@ -94,26 +94,15 @@ public class MainFrame extends JFrame implements GLEventListener
         gl.glPointSize(0.5f);
 
         // Set the width of the lines
-        gl.glLineWidth(0.5f);
+        //gl.glLineWidth(0.5f);
 
-        gl.glLineStipple(1, (short) 0x3F07);
-        gl.glEnable(GL2.GL_LINE_STIPPLE);
+        //gl.glLineStipple(1, (short) 0x3F07);
+        //gl.glEnable(GL2.GL_LINE_STIPPLE);
 
-        gl.glBegin(GL2.GL_POINTS);
-            // Set the vertex color to Red.
-            gl.glColor3f(1.0f, 0.0f, 0.0f);
-            gl.glVertex2f(0.2f, 0.2f);
-            // Set the vertex color to Green.
-            gl.glColor3f(0.0f, 1.0f, 0.0f);
-            gl.glVertex2f(0.4f, 0.2f);
-            // Set the vertex color to Blue.
-            gl.glColor3f(0.0f, 0.0f, 1.0f);
-            gl.glVertex2f(0.2f, 0.4f);
-            // Set the vertex color to White.
-            gl.glColor3f(1.0f, 1.0f, 1.0f);
-            gl.glVertex2f(0.4f, 0.4f);
-        gl.glEnd();
-
+        //drawSquareWithGL_LINES(gl);
+        //drawSquareWithGL_LINE_STRIP(gl);
+        //drawSquareWithGL_LINE_LOOP(gl);
+        drawCircle(gl);
         gl.glFlush();
     }
 
@@ -141,6 +130,67 @@ public class MainFrame extends JFrame implements GLEventListener
 
         // Return to the Modelview matrix.
         gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
+    }
+
+    private void drawSquareWithGL_LINES(GL2 gl) {
+        gl.glBegin(GL.GL_LINES);
+            gl.glColor3f(.0f, .23f, .23f);
+            gl.glVertex2f(.1f, .4f);
+            gl.glVertex2f(.4f, .4f);
+
+            gl.glColor3f(.23f, .23f, .0f);
+            gl.glVertex2f(.4f, .4f);
+            gl.glVertex2f(.4f, .1f);
+
+            gl.glColor3f(.0f, .67f, .67f);
+            gl.glVertex2f(.4f, .1f);
+            gl.glVertex2f(.1f, .1f);
+
+            gl.glColor3f(.5f, .0f, .5f);
+            gl.glVertex2f(.1f, .1f);
+            gl.glVertex2f(.1f, .4f);
+        gl.glEnd();
+    }
+
+    private void drawSquareWithGL_LINE_STRIP(GL2 gl) {
+        gl.glBegin(GL.GL_LINE_STRIP);
+        gl.glColor3f(.0f, .23f, .23f);
+        gl.glVertex2f(.1f, .4f);
+        gl.glVertex2f(.4f, .4f);
+
+        gl.glVertex2f(.4f, .1f);
+
+        gl.glColor3f(.0f, .67f, .67f);
+        gl.glVertex2f(.1f, .1f);
+
+        gl.glColor3f(.5f, .0f, .5f);
+        gl.glVertex2f(.1f, .4f);
+        gl.glEnd();
+    }
+
+    private void drawSquareWithGL_LINE_LOOP(GL2 gl) {
+        gl.glBegin(GL.GL_LINE_LOOP);
+            gl.glColor3f(.0f, .23f, .23f);
+            gl.glVertex2f(.1f, .4f);
+            gl.glVertex2f(.4f, .4f);
+
+            gl.glVertex2f(.4f, .1f);
+            gl.glColor3f(.23f, .23f, .0f);
+
+            gl.glColor3f(.5f, .0f, .5f);
+            gl.glVertex2f(.1f, .1f);
+        gl.glEnd();
+    }
+
+    private void drawCircle(GL2 gl) {
+        gl.glEnable(GL.GL_LINE_LOOP);
+            for(int i = 0; i  < 360; i++) {
+                double angle = Math.toRadians(1);
+                double x = 0.7 * Math.cos(angle);
+                double y = 0.7 * Math.sin(angle);
+                gl.glVertex2f((float) ((float)x + .5), (float) ((float)y + .5));
+            }
+        gl.glEnd();
     }
 
     private GLCanvas canvas;
