@@ -1,23 +1,19 @@
 package org.gui;
 
-import astro.PolarProjectionMap;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLCanvas;
-import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
-import com.jogamp.opengl.util.Animator;
-import com.jogamp.opengl.util.gl2.GLUT;
+import com.jogamp.opengl.util.FPSAnimator;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 
 public class MainFrame extends JFrame implements GLEventListener
 {
-    private GLUT glut;
-    // Holds a reference to the PolarProjectionMap object.
-    private astro.PolarProjectionMap ppm = null;
-    // Used to identify the display list.
-    private int ppm_list;
+
+    private GLCanvas canvas;
+    private FPSAnimator animator;
+    int sun;
+    int sun_x = 5;
 
     public MainFrame()
     {
@@ -54,9 +50,9 @@ public class MainFrame extends JFrame implements GLEventListener
         // Adding an OpenGL event listener to the canvas.
         this.canvas.addGLEventListener(this);
 
-        this.animator = new Animator();
+        this.animator = new FPSAnimator(this.canvas, 400, true);
 
-        this.animator.add(this.canvas);
+        //this.animator.add(this.canvas);
 
         this.animator.start();
     }
@@ -64,21 +60,13 @@ public class MainFrame extends JFrame implements GLEventListener
     public void init(GLAutoDrawable canvas)
     {
         GL2 gl = canvas.getGL().getGL2();
-        // Create a new GLU object.
-        glut = new GLUT();
 
-        // Initialize the object.
-        this.ppm = new astro.PolarProjectionMap(21.53, 45.17);
-        // Set the separator for the line fields.
-        this.ppm.setFileSep(",");
-        // Read the file and compute the coordinates.
-        this.ppm.initializeConstellationLines("data/conlines.dat");
-        // Initialize here the rest of the elements from the remaining files using the corresponding methods.
+        gl.glClearColor(0f, 0f, 1f, 1f);
+        gl.glOrtho(-10f, 10f, -10f, 10f, -10f, 10f);
 
-        // Create the display list.
-        this.ppm_list = gl.glGenLists(1);
-        gl.glNewList(this.ppm_list, GL2.GL_COMPILE);
-        this.makePPM(gl);
+        sun = gl.glGenLists(1);
+        gl.glNewList(sun, GL2.GL_COMPILE);
+            drawCircle(gl, 5f, 5f, 1f);
         gl.glEndList();
     }
 
@@ -91,56 +79,26 @@ public class MainFrame extends JFrame implements GLEventListener
     {
         GL2 gl = canvas.getGL().getGL2();
 
-        // Each time the scene is redrawn we clear the color buffers which is perceived by the user as clearing the scene.
+        drawChessTable(gl);
+        gl.glFlush();
 
-        // Set the color buffer to be filled with the color black when cleared.
-        // It can be defined in the init function (method) also.
-        gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-        // Clear the color buffer.
-        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
-
-        // Specify the raster position.
-        gl.glRasterPos2d(0.5, 0.5);
-        // Render the text in the scene.
-        glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Hello World");
-
-        gl.glCallList(this.ppm_list);
+        if(sun_x == 4) {
+            sun_x = -4;
+        }
+        else {
+            sun_x += 0.5;
+        }
     }
 
-    public void reshape(GLAutoDrawable canvas, int left, int top, int width, int height)
-    {
-        GL2 gl = canvas.getGL().getGL2();
+    public void reshape(GLAutoDrawable canvas, int left, int top, int width, int height) {
 
-        // Select the viewport -- the display area -- to be the entire widget.
-        gl.glViewport(0, 0, width, height);
-
-        // Determine the width to height ratio of the widget.
-        double ratio = (double) width / (double) height;
-
-        // Select the Projection matrix.
-        gl.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
-
-        gl.glLoadIdentity();
-
-        // Select the view volume to be x in the range of 0 to 1, y from 0 to 1 and z from -1 to 1.
-        // We are careful to keep the aspect ratio and enlarging the width or the height.
-        if (ratio < 1)
-            gl.glOrtho(0, 1, 0, 1 / ratio, -1, 1);
-        else
-            gl.glOrtho(0, 1 * ratio, 0, 1, -1, 1);
-
-        // Return to the Modelview matrix.
-        gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
     }
 
-    // Here we define the function for building a circle from line segments.
     private void drawCircle(GL2 gl, float xCenter, float yCenter, float radius) {
-
-        double x, y, angle;
+        double x,y, angle;
 
         gl.glBegin(GL2.GL_LINE_LOOP);
-        for (int i = 0; i < 360; i++) {
+        for (int i=0; i<360; i++) {
             angle = Math.toRadians(i);
             x = radius * Math.cos(angle);
             y = radius * Math.sin(angle);
@@ -149,26 +107,64 @@ public class MainFrame extends JFrame implements GLEventListener
         gl.glEnd();
     }
 
-    // We use this method for creating the display list.
-    private void makePPM(GL2 gl) {
-        final ArrayList<PolarProjectionMap.ConstellationLine> clLines = this.ppm.getConLines();
-        // Add here the rest of the ArrayLists.
+    private void drawHouse(GL2 gl) {
+        gl.glColor3f(0.82f, 0.66f, 0.91f);
+        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
 
-        gl.glColor3f(0.0f, 1.0f, 0.0f);
-
-        gl.glBegin(GL2.GL_LINES);
-        for (PolarProjectionMap.ConstellationLine cl : clLines) {
-            if (cl.isVisible()) {
-                gl.glVertex2d(cl.getPosX1(), cl.getPosY1());
-                gl.glVertex2d(cl.getPosX2(), cl.getPosY2());
-            }
-        }
+        gl.glBegin(GL2.GL_POLYGON);
+        gl.glVertex2f(0f, 3f);
+        gl.glVertex2f(-2f, 1f);
+        gl.glVertex2f(2f, 1f);
         gl.glEnd();
 
-        // Add here the rest of the code for rendering constellation boundaries (use GL_LINES),
-        // names (use glutBitmapString), stars (use GL_POINTS) and cardinal points (use glutBitmapString).
+        gl.glColor3f(0.25f, 0.45f, 0.91f);
+        gl.glBegin(GL2.GL_POLYGON);
+        gl.glVertex2f(1.5f, 1f);
+        gl.glVertex2f(-1.5f, 1f);
+        gl.glVertex2f(-1.5f, -2f);
+        gl.glVertex2f(1.5f, -2f);
+        gl.glEnd();
+
+        gl.glColor3f(0.02f, 0.45f, 0.91f);
+        gl.glBegin(GL2.GL_POLYGON);
+        gl.glVertex2f(1.75f, -2f);
+        gl.glVertex2f(-1.75f, -2f);
+        gl.glVertex2f(-1.75f, -2.25f);
+        gl.glVertex2f(1.75f, -2.25f);
+        gl.glEnd();
+
+        gl.glColor3f(0.5f, 0.66f, 0.91f);
+        gl.glBegin(GL2.GL_POLYGON);
+        gl.glVertex2f(0.5f, -.25f);
+        gl.glVertex2f(-0.5f, -.25f);
+        gl.glVertex2f(-0.5f, -2f);
+        gl.glVertex2f(0.5f, -2f);
+        gl.glEnd();
+
+        gl.glColor3f(0.21f, 0.33f, 0.71f);
+        gl.glBegin(GL2.GL_LINES);
+        gl.glVertex2f(0f, -.25f);
+        gl.glVertex2f(0f, -2f);
+        gl.glEnd();
+
+        gl.glColor3f(1.0f, 1.0f, 1.0f);
+        gl.glCallList(sun);
     }
 
-    private GLCanvas canvas;
-    private Animator animator;
+    private void drawChessTable(GL2 gl) {
+        gl.glCullFace(GL.GL_FRONT);
+        gl.glEnable(GL.GL_CULL_FACE);
+
+        gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2.GL_FILL);
+        for(int i = -5; i < 5; i++) {
+            for(int j = -5; j < 5; j++) {
+                gl.glBegin(GL2.GL_POLYGON);
+                    gl.glVertex2f(i, i + 1);
+                    gl.glVertex2f(i, j);
+                    gl.glVertex2f(i + 1, j);
+                    gl.glVertex2f(i, j + 1);
+                gl.glEnd();
+            }
+        }
+    }
 }
